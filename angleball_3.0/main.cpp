@@ -183,7 +183,7 @@ void clean_up()
 	IMG_Quit();
 	SDL_Quit();
 }
-int main(int argc, char *args[])
+int main(int argc, char *args[])//github
 {
 	quit = false;
 	Uint32 frames = 0;
