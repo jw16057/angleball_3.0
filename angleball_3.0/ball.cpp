@@ -1,5 +1,7 @@
 #ifndef __ball_cpp
 #define __ball_cpp
+
+#include "world.h"
 #include "ball.h"
 #include "Pos.h"
 #include "Jon_Constants.h"
@@ -9,7 +11,7 @@
 
 double symmetric_round(double);
 
-Ball::Ball(double xVel_, double yVel_, double xAccel_, double yAccel_, double damping_, double x_, double y_)
+Ball::Ball(double xVel_, double yVel_, double damping_, double x_, double y_)
 {
 	radius = 16;
 	lastMovement = 0;
@@ -20,8 +22,6 @@ Ball::Ball(double xVel_, double yVel_, double xAccel_, double yAccel_, double da
 
 	xVel = xVel_;
 	yVel = yVel_;
-	xAccel = xAccel_;
-	yAccel = yAccel_;
 	damping = damping_;
 
 	face = ballTexture;
@@ -30,14 +30,27 @@ Ball::Ball(double xVel_, double yVel_, double xAccel_, double yAccel_, double da
 		exit(1);
 }
 
-void Ball::tick(int screenWidth, int screenHeight)
+void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, double gravityStrength, int timeDiff)
 {
-	p.x += xVel;
-	p.y += yVel;
+	double seconds = timeDiff/1000.0;
+	p.x += xVel * seconds;
+	p.y += yVel * seconds;
 
-	xVel += xAccel;
-	yVel += yAccel;
-	
+	switch(gravityDirection)
+	{
+	case UP:
+		yVel -= gravityStrength * seconds;
+		break;
+	case DOWN:
+		yVel += gravityStrength * seconds;
+		break;
+	case LEFT:
+		xVel += gravityStrength * seconds;
+		break;
+	case RIGHT:
+		xVel -= gravityStrength * seconds;
+		break;
+	}
 
 	if(p.y > screenHeight-radius*2)
 	{
@@ -90,7 +103,7 @@ void Ball::bounce()
 		yVel = -yVel;
 }
 
-void Ball::changePos(Pos xy)
+void Ball::changePos(Pos xy)/// Used for mouse commands
 {
 	p.x = xy.x - radius;
 	p.y = xy.y - radius;

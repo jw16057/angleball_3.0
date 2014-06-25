@@ -10,6 +10,7 @@ Date: 6/2/2014
 //STD lib
 #include <cmath>
 #include <cstdlib>
+#include <ctime>
 #include <iostream>//Development only
 //Angleball includes
 #include "world.h"
@@ -146,11 +147,11 @@ void handle_events()
 		if(event.button.button == SDL_BUTTON_LEFT)
 		{
 			Ball * ptr;
-			double xVel = (w->getBeginMousePos().x - event.button.x) / 50.0;
-			double yVel = (w->getBeginMousePos().y - event.button.y) / 50.0;
+			double xVel = (w->getBeginMousePos().x - event.button.x) * 10;
+			double yVel = (w->getBeginMousePos().y - event.button.y) * 10;
 			if(w->deleteTemp())
 			{
-				ptr = new Ball(xVel, yVel, 0, 0.01, 0.7, event.button.x, event.button.y);
+				ptr = new Ball(xVel, yVel, 0.7, event.button.x, event.button.y);
 				w->addBall(ptr);
 			}
 		}
@@ -183,19 +184,20 @@ void clean_up()
 	IMG_Quit();
 	SDL_Quit();
 }
-int main(int argc, char *args[])//github
+int main(int argc, char *args[])
 {
 	quit = false;
-	Uint32 frames = 0;
-
+	int milli_between_frames = floor(1000.0/Jon_Constants::FRAMES_PER_SECOND);
+	Uint32 mainLastTime = SDL_GetTicks();
+	int diff;
 	if(init() == false)
 		return 1;
 	
 	if(load_files() == false)
 		return 1;
 
-	w = new World(DOWN, screenWidth, screenHeight);
-
+	w = new World(DOWN, screenWidth, screenHeight, 500);
+	
 	while(quit == false)
 	{
 		while(SDL_PollEvent(&event))
@@ -206,16 +208,17 @@ int main(int argc, char *args[])//github
 				quit = true;
 		}
 
+		SDL_RenderClear(renderer);
 		w->newFrame();
-
 		w->showTextures(renderer);
-
 		SDL_RenderPresent(renderer);
 
-		frames++;
-
-		SDL_Delay(5);
-		SDL_RenderClear(renderer);
+		/*diff = SDL_GetTicks() - mainLastTime;
+		if(diff < milli_between_frames)
+		{
+			SDL_Delay(milli_between_frames - diff);
+		}
+		mainLastTime = SDL_GetTicks();*/
 	}
 
 	clean_up();

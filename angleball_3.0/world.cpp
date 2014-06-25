@@ -6,6 +6,7 @@
 #include "Jon_SDL_functions.h"
 #include "Pos.h"
 #include <ctime>
+#include <iostream>
 
 World::World(Direction gravityDirection_, int screenWidth_, int screenHeight_, double gravityStrength_)
 {
@@ -15,15 +16,24 @@ World::World(Direction gravityDirection_, int screenWidth_, int screenHeight_, d
 	screenWidth = screenWidth_;
 	screenHeight = screenHeight_;
 	srand((int) time(0));
+	lastTime = SDL_GetTicks();
+	frameNum = 0;
 }
 void World::newFrame() // Call this to advance the world one tick
 {
-	for(int x = balls.size()-1; x >= 0; x--)
+	Uint32 c = SDL_GetTicks();
+	int diff = c-lastTime;
+	lastTime = c;
+
+	int x = balls.size()-1;
+	if(tempOnTop)
+			x--;
+	while(x >= 0)
 	{
-		balls[x].tick(screenWidth, screenHeight);
-		if(balls[x].isStill())
-			balls.erase(balls.begin()+x);
+		balls[x].tick(screenWidth, screenHeight, gravityDirection, gravityStrength, diff);
+		x--;
 	}
+	frameNum++;
 }
 void World::addBall(Ball * x)
 {
@@ -35,7 +45,7 @@ void World::addTemp(Pos p)
 	{
 		beginMousePos = p;
 		currentMousePos = p;
-		balls.push_back(Ball(0,0,0,0,0, p.x, p.y));
+		balls.push_back(Ball(0,0,0, p.x, p.y));
 		tempOnTop = true;
 	}
 }

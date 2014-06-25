@@ -3,8 +3,7 @@
 #include <vector>
 #include "ball.h"
 #include "Pos.h"
-
-enum Direction {UP, DOWN, LEFT, RIGHT, NONE};
+#include "Jon_Constants.h"
 
 class World{
 public:
@@ -21,11 +20,13 @@ public:
 	double getGravityStrength() {return gravityStrength;}
 	int getNumberOfBalls() {return balls.size();}
 	Pos getBeginMousePos() {return beginMousePos;}
+	Uint32 getLastTime() {return lastTime;}
 	const bool tempIsOnTop() {return tempOnTop;}
 private:
 	int screenWidth;
 	int screenHeight;
-	long frameNum;
+	Uint32 frameNum;
+	Uint32 lastTime;
 	bool tempOnTop;
 	Pos beginMousePos;
 	Pos currentMousePos;

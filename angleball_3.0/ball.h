@@ -4,31 +4,32 @@
 #include "SDL.h"
 #include "Pos.h"
 #include "SDL_image.h"
+#include "Jon_Constants.h"
 
 #include <deque>
 
 class Ball{
 public:
-	Ball(double xVel_, double yVel_, double xAccel_, double yAccel_, double damping, double x_, double y_);
-	void tick(int screenWidth, int screenHeight);
+	Ball(double xVel_, double yVel_, double damping, double x_, double y_);
+	void tick(int screenWidth, int screenHeight, Direction gravityDirection, double gravityStrength, int timeDiff);
 	bool isStill();
 	void bounce();
 	void changePos(Pos xy);
 	void changeVel(double x, double y);
 
+	int getRadius() {return radius;}
+	SDL_Texture * getFace() {return face;}
 	double getX() {return p.x;}
 	double getY() {return p.y;}
-	int getRadius() {return radius;}
-	SDL_Texture * getFace() {return face;};
-private:
+	
 	Pos p;
-	int lastMovement;
-	int radius;
 	double xVel;
 	double yVel;
-	double xAccel;
-	double yAccel;
 	double damping;
+	int radius;
+private:
+	
+	int lastMovement;
 	SDL_Texture *face;
 	std::deque<Pos> historyPos;
 };
