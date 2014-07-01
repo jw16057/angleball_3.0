@@ -6,11 +6,13 @@ Date: 6/2/2014
 //SDL includes
 #include "SDL.h"
 #include "SDL_image.h"
-//#include "SDL_ttf.h" pre 2.0
+#include "SDL_ttf.h"
 //STD lib
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <string>
+#include <sstream>
 #include <iostream>//Development only
 //Angleball includes
 #include "world.h"
@@ -21,14 +23,23 @@ SDL_Window *window = NULL;
 
 SDL_Event event;
 
-SDL_Renderer* renderer;
+SDL_Renderer *renderer = NULL;
 
-SDL_Texture* surfaceTexture;
+TTF_Font *font = NULL;
+
+SDL_Texture* surfaceTexture = NULL;
 SDL_Texture* ballTexture = NULL;
+SDL_Texture* textTexture = NULL;
+
+SDL_Surface* textSurface = NULL;
+
+SDL_Color textColor = {0, 0, 0};
+SDL_Color textBackgroundColor = {255,255,255};
 
 World *w = NULL;
-int screenWidth;
-int screenHeight;
+
+int screenWidth = NULL;
+int screenHeight = NULL;
 
 bool quit;
 
@@ -79,14 +90,14 @@ namespace Jon_SDL_functions
 		return optimizedImage;
 	}
 
-	void apply_surface(int x, int y, SDL_Texture *source, SDL_Renderer *destination)
+	void apply_surface(int x, int y, int w, int h, SDL_Texture *source, SDL_Renderer *destination)
 	{
 		SDL_Rect offset;
 
 		offset.x = x;
 		offset.y = y;
-		offset.w = 32;
-		offset.h = 32;
+		offset.w = w;
+		offset.h = h;
 
 		SDL_RenderCopy(destination, source, NULL, &offset);
 	}
@@ -99,13 +110,17 @@ bool init()
 
 	if(SDL_Init(SDL_INIT_VIDEO) < 0)
 		return false;
+
+	SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ); // testing
 	
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
 	screenWidth = current.w;
 	screenHeight = current.h;
+	screenHeight = 640;
+	screenWidth = 640;
 
-	window = SDL_CreateWindow("Angleball 3.0", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_FULLSCREEN);//2.0
+	window = SDL_CreateWindow("Angleball 3.0", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);//2.0
 
 	if(window == NULL)
 		return false;
@@ -121,11 +136,18 @@ bool init()
 	if(!IMG_Init(imgFlags) & imgFlags)
 		return false;
 
+	if(TTF_Init() < 0)
+		return false;
+
 	return true;
 }
 bool load_files()
 {
 	ballTexture = Jon_SDL_functions::load_image("ball.png", 0, 0, 0);
+
+	font = TTF_OpenFont("Scada-Regular.ttf", 28);
+	if(font == NULL)
+		return false;
 
 	return true;
 }
@@ -175,21 +197,38 @@ void clean_up()
 {
 	SDL_DestroyTexture(ballTexture);
 	ballTexture = NULL;
+	SDL_DestroyTexture(textTexture);
+	textTexture = NULL;
+
+	SDL_FreeSurface(textSurface);
+	textSurface = NULL;
+
+	TTF_CloseFont(font);
+	font = NULL;
 
 	SDL_DestroyRenderer(renderer);
+	renderer = NULL;
 	SDL_DestroyWindow(window);
 	window = NULL;
-	renderer = NULL;
 
+	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
+}
+void fps_counter(World *w)
+{
+
 }
 int main(int argc, char *args[])
 {
 	quit = false;
 	int milli_between_frames = floor(1000.0/Jon_Constants::FRAMES_PER_SECOND);
-	Uint32 mainLastTime = SDL_GetTicks();
-	int diff;
+	int stringWidth =  0, stringHeight = 0;
+	std::stringstream ss;
+	std::string text;
+	Uint32 timeSinceLastFpsCheck = 0;
+	int x = 0;
+
 	if(init() == false)
 		return 1;
 	
@@ -198,8 +237,11 @@ int main(int argc, char *args[])
 
 	w = new World(DOWN, screenWidth, screenHeight, 500);
 	
+	Uint32 oldTime, curTime;
+	oldTime = SDL_GetTicks();
 	while(quit == false)
 	{
+		
 		while(SDL_PollEvent(&event))
 		{
 			handle_events();
@@ -207,18 +249,45 @@ int main(int argc, char *args[])
 			if(event.type == SDL_QUIT)
 				quit = true;
 		}
-
+		
 		SDL_RenderClear(renderer);
-		w->newFrame();
+
+		
+		if(w->getFrameNum() % 100 == 0)// || w->getFrameNum() == 0)
+		{
+			/*ss << floor((1.0/(w->getCurrentTime() - timeSinceLastFpsCheck)) * 1000 * 100) << std::endl << "Hello, World!" << std::endl;*/
+			ss << floor((1.0/(oldTime - timeSinceLastFpsCheck)) * 1000 * 100) << std::endl << "Hello, World!" << std::endl;
+			/*timeSinceLastFpsCheck = w->getCurrentTime();*/
+			timeSinceLastFpsCheck = oldTime;
+			text = ss.str();
+			ss.str("");
+			SDL_FreeSurface(textSurface);
+			SDL_DestroyTexture(textTexture);
+			textSurface = NULL;
+			textTexture = NULL;
+			textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+			textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+			TTF_SizeText(font, text.c_str(), &stringWidth, &stringHeight);
+		}
+		Jon_SDL_functions::apply_surface(50, 50, stringWidth, stringHeight, textTexture, renderer);
+		int t = SDL_GetTicks()-oldTime;
+		std::cout << t << std::endl;
+		w->newFrame(t);
+		oldTime += t;
+
+
+		//if(w->getDiffTime() < milli_between_frames)
+		if(t < milli_between_frames)
+		{
+			SDL_Delay(milli_between_frames - t);
+		}
+
 		w->showTextures(renderer);
+
 		SDL_RenderPresent(renderer);
 
-		/*diff = SDL_GetTicks() - mainLastTime;
-		if(diff < milli_between_frames)
-		{
-			SDL_Delay(milli_between_frames - diff);
-		}
-		mainLastTime = SDL_GetTicks();*/
+
+		
 	}
 
 	clean_up();

@@ -82,6 +82,8 @@ void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, d
 		lastMovement = 0;
 
 	historyPos.push_back(current);
+	if(historyPos.size() >= 5)
+		historyPos.pop_front();
 }
 
 bool Ball::isStill()

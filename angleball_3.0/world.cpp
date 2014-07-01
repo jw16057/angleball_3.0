@@ -16,15 +16,17 @@ World::World(Direction gravityDirection_, int screenWidth_, int screenHeight_, d
 	screenWidth = screenWidth_;
 	screenHeight = screenHeight_;
 	srand((int) time(0));
-	lastTime = SDL_GetTicks();
 	frameNum = 0;
+	currentTime = 0;
+	lastTime = 0;
+	diffTime = 0;
 }
-void World::newFrame() // Call this to advance the world one tick
+void World::newFrame(int diff) // Call this to advance the world one tick
 {
-	Uint32 c = SDL_GetTicks();
-	int diff = c-lastTime;
-	lastTime = c;
-
+	/*currentTime = SDL_GetTicks();
+	diffTime = currentTime-lastTime;
+	lastTime = currentTime;
+*/
 	int x = balls.size()-1;
 	if(tempOnTop)
 			x--;
@@ -33,6 +35,7 @@ void World::newFrame() // Call this to advance the world one tick
 		balls[x].tick(screenWidth, screenHeight, gravityDirection, gravityStrength, diff);
 		x--;
 	}
+
 	frameNum++;
 }
 void World::addBall(Ball * x)
@@ -80,7 +83,7 @@ void World::showTextures(SDL_Renderer * s)
 	}
 	for(int x = 0; x < getNumberOfBalls(); x++)
 	{
-		Jon_SDL_functions::apply_surface((int) floor(balls[x].getX()), (int) ceil(balls[x].getY()), balls[x].getFace(), s);
+		Jon_SDL_functions::apply_surface((int) floor(balls[x].getX()), (int) ceil(balls[x].getY()), 32, 32, balls[x].getFace(), s);
 	}
 }
 void World::moveTempBall(Pos p)
