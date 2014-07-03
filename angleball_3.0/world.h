@@ -4,11 +4,12 @@
 #include "ball.h"
 #include "Pos.h"
 #include "Jon_Constants.h"
+#include "timer.h"
 
 class World{
 public:
 	World(Direction gravityDirection_, int screenWidth_, int screenHeight, double gravityStrength_ = 0.01);
-	void newFrame(int diff); // Call this to advance the world one tick
+	void newFrame(); // Call this to advance the world one tick
 	void addBall(Ball * x);
 	void addTemp(Pos p);
 	bool deleteBall(Pos p);
@@ -26,7 +27,7 @@ private:
 	int screenWidth;
 	int screenHeight;
 	Uint32 frameNum;
-	Uint32 lastTime;
+	Timer speedControl;
 	bool tempOnTop;
 	Pos beginMousePos;
 	Pos currentMousePos;

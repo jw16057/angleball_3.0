@@ -18,6 +18,7 @@ Date: 6/2/2014
 #include "world.h"
 #include "ball.h"
 #include "Jon_Constants.h"
+#include "timer.h"
 
 SDL_Window *window = NULL;
 
@@ -110,8 +111,6 @@ bool init()
 
 	if(SDL_Init(SDL_INIT_VIDEO) < 0)
 		return false;
-
-	SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ); // testing
 	
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
@@ -120,7 +119,7 @@ bool init()
 	screenHeight = 640;
 	screenWidth = 640;
 
-	window = SDL_CreateWindow("Angleball 3.0", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);//2.0
+	window = SDL_CreateWindow("Angleball 3.0", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);
 
 	if(window == NULL)
 		return false;
@@ -215,19 +214,20 @@ void clean_up()
 	IMG_Quit();
 	SDL_Quit();
 }
-void fps_counter(World *w)
-{
-
-}
 int main(int argc, char *args[])
 {
 	quit = false;
+
 	int milli_between_frames = floor(1000.0/Jon_Constants::FRAMES_PER_SECOND);
+
+	//For fps display
 	int stringWidth =  0, stringHeight = 0;
 	std::stringstream ss;
 	std::string text;
-	Uint32 timeSinceLastFpsCheck = 0;
-	int x = 0;
+
+	//Timers
+	Timer fpsLimiter;
+	Timer fpsDisplay;
 
 	if(init() == false)
 		return 1;
@@ -237,11 +237,12 @@ int main(int argc, char *args[])
 
 	w = new World(DOWN, screenWidth, screenHeight, 500);
 	
-	Uint32 oldTime, curTime;
-	oldTime = SDL_GetTicks();
+	fpsDisplay.start();//First time will be a little off, Oh well.
+
 	while(quit == false)
 	{
-		
+		fpsLimiter.start();
+
 		while(SDL_PollEvent(&event))
 		{
 			handle_events();
@@ -253,41 +254,38 @@ int main(int argc, char *args[])
 		SDL_RenderClear(renderer);
 
 		
-		if(w->getFrameNum() % 100 == 0)// || w->getFrameNum() == 0)
+		if(w->getFrameNum() % 100 == 0)
 		{
-			/*ss << floor((1.0/(w->getCurrentTime() - timeSinceLastFpsCheck)) * 1000 * 100) << std::endl << "Hello, World!" << std::endl;*/
-			ss << floor((1.0/(oldTime - timeSinceLastFpsCheck)) * 1000 * 100) << std::endl << "Hello, World!" << std::endl;
-			/*timeSinceLastFpsCheck = w->getCurrentTime();*/
-			timeSinceLastFpsCheck = oldTime;
+			ss << "FPS: " << floor((1.0/fpsDisplay.getTime()) * 1000 * 100)  << std::endl;
+			fpsDisplay.reset();
+			fpsDisplay.start();
+
 			text = ss.str();
 			ss.str("");
+
 			SDL_FreeSurface(textSurface);
 			SDL_DestroyTexture(textTexture);
 			textSurface = NULL;
 			textTexture = NULL;
 			textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
 			textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
 			TTF_SizeText(font, text.c_str(), &stringWidth, &stringHeight);
 		}
 		Jon_SDL_functions::apply_surface(50, 50, stringWidth, stringHeight, textTexture, renderer);
-		int t = SDL_GetTicks()-oldTime;
-		//std::cout << t << std::endl;
-		w->newFrame(t);
-		oldTime += t;
 
-
-		//if(w->getDiffTime() < milli_between_frames)
-		if(t < milli_between_frames)
-		{
-			SDL_Delay(milli_between_frames - t);
-		}
+		w->newFrame();
 
 		w->showTextures(renderer);
 
 		SDL_RenderPresent(renderer);
 
-
+		if(fpsLimiter.getTime() < milli_between_frames)
+		{
+			SDL_Delay(milli_between_frames - fpsLimiter.getTime());
+		}
 		
+		fpsLimiter.reset();
 	}
 
 	clean_up();

@@ -17,24 +17,19 @@ World::World(Direction gravityDirection_, int screenWidth_, int screenHeight_, d
 	screenHeight = screenHeight_;
 	srand((int) time(0));
 	frameNum = 0;
-	currentTime = 0;
-	lastTime = 0;
-	diffTime = 0;
 }
-void World::newFrame(int diff) // Call this to advance the world one tick
+void World::newFrame() // Call this to advance the world one tick
 {
-	/*currentTime = SDL_GetTicks();
-	diffTime = currentTime-lastTime;
-	lastTime = currentTime;
-*/
 	int x = balls.size()-1;
 	if(tempOnTop)
 			x--;
 	while(x >= 0)
 	{
-		balls[x].tick(screenWidth, screenHeight, gravityDirection, gravityStrength, diff);
+		balls[x].tick(screenWidth, screenHeight, gravityDirection, gravityStrength, speedControl.getTime());
 		x--;
 	}
+	speedControl.reset();
+	speedControl.start();
 
 	frameNum++;
 }

@@ -9,9 +9,9 @@
 class Timer{
 public:
 	Timer();
-	void startTimer();
-	Uint32 pauseTimer();
-	void resetTimer();
+	void start();
+	void pause();
+	void reset();
 	Uint32 getTime();
 private:
 	Uint32 startTime;
