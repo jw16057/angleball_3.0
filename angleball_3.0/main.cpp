@@ -271,7 +271,7 @@ int main(int argc, char *args[])
 		}
 		Jon_SDL_functions::apply_surface(50, 50, stringWidth, stringHeight, textTexture, renderer);
 		int t = SDL_GetTicks()-oldTime;
-		std::cout << t << std::endl;
+		//std::cout << t << std::endl;
 		w->newFrame(t);
 		oldTime += t;
 

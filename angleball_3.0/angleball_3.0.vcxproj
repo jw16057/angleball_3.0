@@ -77,6 +77,7 @@
   <ItemGroup>
     <ClCompile Include="ball.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="timer.cpp" />
     <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +85,7 @@
     <ClInclude Include="Jon_Constants.h" />
     <ClInclude Include="Jon_SDL_functions.h" />
     <ClInclude Include="Pos.h" />
+    <ClInclude Include="timer.h" />
     <ClInclude Include="world.h" />
   </ItemGroup>
   <ItemGroup>
