@@ -12,7 +12,7 @@ public:
 	void newFrame(); // Call this to advance the world one tick
 	void addBall(Ball * x);
 	void addTemp(Pos p);
-	bool deleteBall(Pos p);
+	void deleteBall(Pos p);
 	bool deleteTemp();
 	void showTextures(SDL_Renderer * s);
 	void moveTempBall(Pos p);

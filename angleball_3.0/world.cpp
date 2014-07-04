@@ -64,9 +64,17 @@ bool World::deleteTemp()
 	else
 		return false;
 }
-bool World::deleteBall(Pos p)
+void World::deleteBall(Pos p)
 {
-	return true;
+	int x = balls.size() - 1;
+	if(tempOnTop)
+			x--;
+	while(x >= 0)
+	{
+		if(balls[x].isWithin(p))
+			balls.erase(balls.begin() + x);
+		x--;
+	}
 }
 void World::showTextures(SDL_Renderer * s)
 {

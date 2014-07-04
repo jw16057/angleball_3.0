@@ -7,6 +7,7 @@ Date: 6/2/2014
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
+#include "SDL_mixer.h"
 //STD lib
 #include <cmath>
 #include <cstdlib>
@@ -36,6 +37,8 @@ SDL_Surface* textSurface = NULL;
 
 SDL_Color textColor = {0, 0, 0};
 SDL_Color textBackgroundColor = {255,255,255};
+
+Mix_Chunk *bounceNoise = NULL;
 
 World *w = NULL;
 
@@ -109,7 +112,7 @@ bool init()
 {
 	window = NULL;
 
-	if(SDL_Init(SDL_INIT_VIDEO) < 0)
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
 		return false;
 	
 	SDL_DisplayMode current;
@@ -135,6 +138,9 @@ bool init()
 	if(!IMG_Init(imgFlags) & imgFlags)
 		return false;
 
+	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 2048) < 0)
+		return false;
+
 	if(TTF_Init() < 0)
 		return false;
 
@@ -143,6 +149,12 @@ bool init()
 bool load_files()
 {
 	ballTexture = Jon_SDL_functions::load_image("ball.png", 0, 0, 0);
+	if(ballTexture == NULL)
+		return false;
+
+	bounceNoise = Mix_LoadWAV("bounceNoise.wav");
+	if(bounceNoise == NULL)
+		return false;
 
 	font = TTF_OpenFont("Scada-Regular.ttf", 28);
 	if(font == NULL)
@@ -161,6 +173,7 @@ void handle_events()
 		else if(event.button.button == SDL_BUTTON_RIGHT)
 		{
 			w->deleteBall(Pos(event.button.x, event.button.y));
+			std::cout << "deleting" << std::endl;//test
 		}
 	}
 	if(event.type == SDL_MOUSEBUTTONUP)
@@ -175,14 +188,26 @@ void handle_events()
 				ptr = new Ball(xVel, yVel, 0.7, event.button.x, event.button.y);
 				w->addBall(ptr);
 			}
+			Mix_PlayChannel(-1, bounceNoise, 0);
 		}
 	}
 	if(event.type == SDL_MOUSEMOTION)
 	{
-		if(w->tempIsOnTop() == true)
+		if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1))
 		{
-			w->moveTempBall(Pos(event.motion.x, event.motion.y));
+			if(w->tempIsOnTop() == true)
+			{
+				w->moveTempBall(Pos(event.motion.x, event.motion.y));
+				
+			}
+			std::cout << "moving" << std::endl;//test
 		}
+		if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))
+		{
+			w->deleteBall(Pos(event.button.x, event.button.y));
+			std::cout << "deleting" << std::endl;///test
+		}
+		
 	}
 	if(event.type == SDL_KEYDOWN)
 	{
@@ -205,6 +230,9 @@ void clean_up()
 	TTF_CloseFont(font);
 	font = NULL;
 
+	Mix_FreeChunk(bounceNoise);
+	bounceNoise = NULL;
+
 	SDL_DestroyRenderer(renderer);
 	renderer = NULL;
 	SDL_DestroyWindow(window);
@@ -212,6 +240,7 @@ void clean_up()
 
 	TTF_Quit();
 	IMG_Quit();
+	Mix_Quit();
 	SDL_Quit();
 }
 int main(int argc, char *args[])
@@ -267,7 +296,7 @@ int main(int argc, char *args[])
 			SDL_DestroyTexture(textTexture);
 			textSurface = NULL;
 			textTexture = NULL;
-			textSurface = TTF_RenderText_Solid(font, text.c_str(), textColor);
+			textSurface = TTF_RenderText_Blended(font, text.c_str(), textColor);
 			textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
 			TTF_SizeText(font, text.c_str(), &stringWidth, &stringHeight);

@@ -16,11 +16,12 @@ public:
 	void bounce();
 	void changePos(Pos xy);
 	void changeVel(double x, double y);
+	bool isWithin(Pos mouse);
 
 	int getRadius() {return radius;}
 	SDL_Texture * getFace() {return face;}
-	double getX() {return p.x;}
-	double getY() {return p.y;}
+	double getX() {return p.x - radius;}
+	double getY() {return p.y - radius;}
 	
 	Pos p;
 	double xVel;

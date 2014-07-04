@@ -15,8 +15,8 @@ Ball::Ball(double xVel_, double yVel_, double damping_, double x_, double y_)
 {
 	radius = 16;
 	lastMovement = 0;
-	p.x = x_ - radius;
-	p.y = y_ - radius;
+	p.x = x_;
+	p.y = y_;
 
 	historyPos.push_back(Pos(p.x, p.y));
 
@@ -45,31 +45,32 @@ void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, d
 		yVel += gravityStrength * seconds;
 		break;
 	case LEFT:
-		xVel += gravityStrength * seconds;
+		xVel -= gravityStrength * seconds;
 		break;
 	case RIGHT:
-		xVel -= gravityStrength * seconds;
+		xVel += gravityStrength * seconds;
 		break;
 	}
 
-	if(p.y > screenHeight-radius*2)
+	if(p.y > screenHeight-radius)
 	{
-		int displacement = (int) p.y - (screenHeight-radius*2);
-		p.y = (screenHeight-radius*2) - displacement;
+		int displacement = (int) p.y - (screenHeight-radius);
+		p.y = (screenHeight-radius) - displacement;
 		yVel = -yVel * damping;
 		xVel = xVel * damping;
 	}
-	if(p.x > screenWidth-radius*2)
+	if(p.x > screenWidth-radius)
 	{
-		int displacement = (int) p.x - (screenWidth-radius*2);
-		p.x = (screenWidth-radius*2) - displacement;
+		int displacement = (int) p.x - (screenWidth-radius);
+		p.x = (screenWidth-radius) - displacement;
 		yVel = yVel * damping;
 		xVel = -xVel * damping;
 		
 	}
-	if(p.x < 0)
+	if(p.x < 0 + radius)
 	{
-		p.x = -p.x;
+		int displacement = (int) p.x - radius;
+		p.x = radius - displacement;
 		yVel = yVel * damping;
 		xVel = -xVel * damping;
 	}
@@ -107,8 +108,18 @@ void Ball::bounce()
 
 void Ball::changePos(Pos xy)/// Used for mouse commands
 {
-	p.x = xy.x - radius;
-	p.y = xy.y - radius;
+	p.x = xy.x;
+	p.y = xy.y;
+}
+
+bool Ball::isWithin(Pos mouse)
+{
+	float t = sqrt((p.x - mouse.x)*(p.x - mouse.x) + (p.y - mouse.y)*(p.y - mouse.y));// Pythagoreans theorem
+
+	if(t <= radius)
+		return true;
+	else
+		return false;
 }
 
 #endif
