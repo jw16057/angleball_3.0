@@ -3,6 +3,7 @@
 
 #include "SDL.h"
 #include "Pos.h"
+#include "collision.h"
 #include "SDL_image.h"
 #include "Jon_Constants.h"
 
@@ -11,7 +12,7 @@
 class Ball{
 public:
 	Ball(double xVel_, double yVel_, double damping, double x_, double y_);
-	void tick(int screenWidth, int screenHeight, Direction gravityDirection, double gravityStrength, int timeDiff);
+	Collision * tick(int screenWidth, int screenHeight, Direction gravityDirection, double gravityStrength, int timeDiff);
 	bool isStill();
 	void bounce();
 	void changePos(Pos xy);

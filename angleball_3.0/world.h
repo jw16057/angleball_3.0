@@ -3,6 +3,7 @@
 #include <vector>
 #include "ball.h"
 #include "Pos.h"
+#include "collision.h"
 #include "Jon_Constants.h"
 #include "timer.h"
 
@@ -23,6 +24,7 @@ public:
 	Pos getBeginMousePos() {return beginMousePos;}
 	Uint32 getFrameNum() {return frameNum;}
 	const bool tempIsOnTop() {return tempOnTop;}
+	Collision * popCollision();
 private:
 	int screenWidth;
 	int screenHeight;
@@ -36,6 +38,7 @@ private:
 	double gravityStrength;
 
 	std::vector <Ball> balls;
+	std::vector <Collision *> collisions;
 };
 
 #endif

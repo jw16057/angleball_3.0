@@ -21,11 +21,16 @@ World::World(Direction gravityDirection_, int screenWidth_, int screenHeight_, d
 void World::newFrame() // Call this to advance the world one tick
 {
 	int x = balls.size()-1;
+	Collision * returnedValue;
 	if(tempOnTop)
 			x--;
 	while(x >= 0)
 	{
-		balls[x].tick(screenWidth, screenHeight, gravityDirection, gravityStrength, speedControl.getTime());
+		returnedValue = balls[x].tick(screenWidth, screenHeight, gravityDirection, gravityStrength, speedControl.getTime());
+		
+		if(returnedValue != NULL)
+			collisions.push_back(returnedValue);
+
 		x--;
 	}
 	speedControl.reset();

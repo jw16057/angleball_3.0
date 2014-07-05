@@ -4,6 +4,7 @@
 #include "world.h"
 #include "ball.h"
 #include "Pos.h"
+#include "collision.h"
 #include "Jon_Constants.h"
 #include "Jon_SDL_functions.h"
 
@@ -30,8 +31,11 @@ Ball::Ball(double xVel_, double yVel_, double damping_, double x_, double y_)
 		exit(1);
 }
 
-void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, double gravityStrength, int timeDiff)
+Collision * Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, double gravityStrength, int timeDiff)
 {
+	Collision * result;
+	result = NULL;
+
 	double seconds = timeDiff/1000.0;
 	p.x += xVel * seconds;
 	p.y += yVel * seconds;
@@ -58,6 +62,7 @@ void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, d
 		p.y = (screenHeight-radius) - displacement;
 		yVel = -yVel * damping;
 		xVel = xVel * damping;
+		result = new Collision(xVel, yVel);
 	}
 	if(p.x > screenWidth-radius)
 	{
@@ -65,7 +70,7 @@ void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, d
 		p.x = (screenWidth-radius) - displacement;
 		yVel = yVel * damping;
 		xVel = -xVel * damping;
-		
+		result = new Collision(xVel, yVel);
 	}
 	if(p.x < 0 + radius)
 	{
@@ -73,6 +78,7 @@ void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, d
 		p.x = radius - displacement;
 		yVel = yVel * damping;
 		xVel = -xVel * damping;
+		result = new Collision(xVel, yVel);
 	}
 
 	Pos current(p.x, p.y);
@@ -85,6 +91,8 @@ void Ball::tick(int screenWidth, int screenHeight, Direction gravityDirection, d
 	historyPos.push_back(current);
 	if(historyPos.size() >= 5)
 		historyPos.pop_front();
+
+	return result;
 }
 
 bool Ball::isStill()

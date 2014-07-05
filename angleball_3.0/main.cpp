@@ -307,6 +307,11 @@ int main(int argc, char *args[])
 
 		w->showTextures(renderer);
 
+		while(w->popCollision())
+		{
+
+		}
+
 		SDL_RenderPresent(renderer);
 
 		if(fpsLimiter.getTime() < milli_between_frames)

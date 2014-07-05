@@ -76,12 +76,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ball.cpp" />
+    <ClCompile Include="collision.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="timer.cpp" />
     <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ball.h" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="Jon_Constants.h" />
     <ClInclude Include="Jon_SDL_functions.h" />
     <ClInclude Include="Pos.h" />
