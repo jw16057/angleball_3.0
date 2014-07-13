@@ -17,6 +17,9 @@ public:
 	bool deleteTemp();
 	void showTextures(SDL_Renderer * s);
 	void moveTempBall(Pos p);
+	Collision * popCollision();
+	void setDeleteKeyPressed(Pos mousePos);
+	void resetDeleteKeyPressed();
 
 	Direction getGravityDirection() {return gravityDirection;}
 	double getGravityStrength() {return gravityStrength;}
@@ -24,13 +27,14 @@ public:
 	Pos getBeginMousePos() {return beginMousePos;}
 	Uint32 getFrameNum() {return frameNum;}
 	const bool tempIsOnTop() {return tempOnTop;}
-	Collision * popCollision();
 private:
 	int screenWidth;
 	int screenHeight;
 	Uint32 frameNum;
 	Timer speedControl;
 	bool tempOnTop;
+	bool poppedOnTop;
+	bool deleteKeyPressed;
 	Pos beginMousePos;
 	Pos currentMousePos;
 

@@ -11,6 +11,8 @@
 World::World(Direction gravityDirection_, int screenWidth_, int screenHeight_, double gravityStrength_)
 {
 	tempOnTop = false;
+	poppedOnTop = false;
+	deleteKeyPressed = false;
 	gravityDirection = gravityDirection_;
 	gravityStrength = gravityStrength_;
 	screenWidth = screenWidth_;
@@ -20,6 +22,9 @@ World::World(Direction gravityDirection_, int screenWidth_, int screenHeight_, d
 }
 void World::newFrame() // Call this to advance the world one tick
 {
+	if(deleteKeyPressed)
+		deleteBall(currentMousePos);
+
 	int x = balls.size()-1;
 	Collision * returnedValue;
 	if(tempOnTop)
@@ -101,4 +106,32 @@ void World::moveTempBall(Pos p)
 		currentMousePos = p;
 		balls.back().changePos(p);
 	}
+}
+Collision * World::popCollision()
+{
+	if(poppedOnTop)
+	{
+		Collision * temp = collisions.back();
+		collisions.pop_back();
+		delete temp;
+
+		poppedOnTop = false;
+	}
+	if(!collisions.empty())
+	{
+		poppedOnTop = true;
+		return collisions.back();
+	}
+	else
+		return NULL;
+}
+void World::setDeleteKeyPressed(Pos mousePos)
+{
+	deleteKeyPressed = true;
+
+	currentMousePos = mousePos;
+}
+void World::resetDeleteKeyPressed()
+{
+	deleteKeyPressed = false;
 }

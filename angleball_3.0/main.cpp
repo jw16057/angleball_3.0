@@ -172,8 +172,7 @@ void handle_events()
 		}
 		else if(event.button.button == SDL_BUTTON_RIGHT)
 		{
-			w->deleteBall(Pos(event.button.x, event.button.y));
-			std::cout << "deleting" << std::endl;//test
+			w->setDeleteKeyPressed(Pos(event.button.x, event.button.y));
 		}
 	}
 	if(event.type == SDL_MOUSEBUTTONUP)
@@ -188,7 +187,10 @@ void handle_events()
 				ptr = new Ball(xVel, yVel, 0.7, event.button.x, event.button.y);
 				w->addBall(ptr);
 			}
-			Mix_PlayChannel(-1, bounceNoise, 0);
+		}
+		else if(event.button.button == SDL_BUTTON_RIGHT)
+		{
+			w->resetDeleteKeyPressed();
 		}
 	}
 	if(event.type == SDL_MOUSEMOTION)
@@ -200,12 +202,10 @@ void handle_events()
 				w->moveTempBall(Pos(event.motion.x, event.motion.y));
 				
 			}
-			std::cout << "moving" << std::endl;//test
 		}
-		if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))
+		else if(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))
 		{
-			w->deleteBall(Pos(event.button.x, event.button.y));
-			std::cout << "deleting" << std::endl;///test
+			w->setDeleteKeyPressed(Pos(event.button.x, event.button.y));
 		}
 		
 	}
@@ -248,6 +248,8 @@ int main(int argc, char *args[])
 	quit = false;
 
 	int milli_between_frames = floor(1000.0/Jon_Constants::FRAMES_PER_SECOND);
+
+	Collision * popHolder;
 
 	//For fps display
 	int stringWidth =  0, stringHeight = 0;
@@ -307,9 +309,18 @@ int main(int argc, char *args[])
 
 		w->showTextures(renderer);
 
-		while(w->popCollision())
+		while(popHolder = w->popCollision())
 		{
-
+			double velocity = popHolder->GetVelocity();
+			if(velocity > 20)
+			{
+				/*int volume = floor(pow(1.01, velocity-20)*(MIX_MAX_VOLUME/100.0));*/
+				int volume = floor(velocity*(MIX_MAX_VOLUME/1000.0));
+				if(volume > MIX_MAX_VOLUME || volume < 0)
+					volume = MIX_MAX_VOLUME;
+				Mix_VolumeChunk(bounceNoise, volume);
+				Mix_PlayChannel(-1, bounceNoise, 0);
+			}
 		}
 
 		SDL_RenderPresent(renderer);
