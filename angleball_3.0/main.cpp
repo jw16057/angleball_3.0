@@ -113,7 +113,10 @@ bool init()
 	window = NULL;
 
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+	{
+		std::cout << "error calling SDL_Init()" << std::endl;
 		return false;
+	}
 	
 	SDL_DisplayMode current;
 	SDL_GetCurrentDisplayMode(0, &current);
@@ -125,24 +128,39 @@ bool init()
 	window = SDL_CreateWindow("Angleball 3.0", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);
 
 	if(window == NULL)
+	{
+		std::cout << "error creating window" << std::endl;
 		return false;
+	}
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	
 	if(renderer == NULL)
+	{
+		std::cout << "error creating renderer" << std::endl;
 		return false;
+	}
 
 	SDL_SetRenderDrawColor(renderer, 0, 55, 0, 255);
 
 	int imgFlags = IMG_INIT_PNG;
 	if(!IMG_Init(imgFlags) & imgFlags)
+	{
+		std::cout << "error initiating SDL::IMG_INIT()" << std::endl;
 		return false;
+	}
 
-	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 1, 2048) < 0)
+	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
+	{
+		std::cout << "error calling Mix_OpenAudio" << std::endl;
 		return false;
+	}
 
 	if(TTF_Init() < 0)
+	{
+		std::cout << "error calling TTF_Init()" << std::endl;
 		return false;
+	}
 
 	return true;
 }
@@ -261,10 +279,18 @@ int main(int argc, char *args[])
 	Timer fpsDisplay;
 
 	if(init() == false)
+	{
+		std::cout << "error initiating program" << std::endl;
+		clean_up();
 		return 1;
+	}
 	
 	if(load_files() == false)
+	{
+		std::cout << "error loading files" << std::endl;
+		clean_up();
 		return 1;
+	}
 
 	w = new World(DOWN, screenWidth, screenHeight, 500);
 	
