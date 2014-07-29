@@ -277,6 +277,7 @@ int main(int argc, char *args[])
 	//Timers
 	Timer fpsLimiter;
 	Timer fpsDisplay;
+	Timer totalTime;
 
 	if(init() == false)
 	{
@@ -295,6 +296,7 @@ int main(int argc, char *args[])
 	w = new World(DOWN, screenWidth, screenHeight, 500);
 	
 	fpsDisplay.start();//First time will be a little off, Oh well.
+	totalTime.start();
 
 	while(quit == false)
 	{
@@ -358,8 +360,16 @@ int main(int argc, char *args[])
 		
 		fpsLimiter.reset();
 	}
-
+	double time = totalTime.getTime() / 1000.0;
+	int frames = w->getFrameNum();
+	
+	delete w;
 	clean_up();
+
+	std::cout << "Frames Total: " << frames << std::endl;
+	std::cout << "Seconds Total: " << time << std::endl;
+	std::cout << "Average FPS: " << frames/time << std::endl;
+	std::cin.get();
 
 	return 0;
 }
